@@ -1,0 +1,34 @@
+# Pipeline de Adquisición de Datos Meteorológicos - Hérault
+
+Este repositorio implementa un sistema automatizado de extracción y estructuración de datos climáticos para el monitoreo de riesgos de **Retrait-Gonflement des Argiles (RGA)** en el departamento de Hérault, Francia.
+
+## Especificaciones del Sistema
+
+### 1. Extracción de Datos (Backend)
+El núcleo del sistema es un script de Python (`recolector.py`) que interactúa con la API oficial de **Météo-France**. El proceso incluye:
+
+* **Segmentación Geográfica:** Monitoreo de 28 estaciones mediante coordenadas GPS y altitudes específicas.
+* **Variables de Control:** * `RR`: Precipitación acumulada en 24h (mm).
+    * `TM`: Temperatura Media diaria calculada mediante la media aritmética de extremos ($T_{max}$, $T_{min}$).
+* **Horizonte Temporal:** Pronóstico dinámico a 7 días.
+
+### 2. Automatización y Seguridad
+El flujo de datos está gestionado por **GitHub Actions** con los siguientes protocolos:
+
+* **Programación:** Ejecución diaria automatizada (Cron Job).
+* **Resiliencia:** Implementación de un sistema de reintentos (*retries*) con retardos programados para mitigar errores de red o saturación de API.
+* **Persistencia:** Actualización automática del archivo `herault_pronostico_meteofrance.csv` en la rama principal.
+
+## Estructura de Salida (Dataset)
+
+El archivo CSV generado contiene las siguientes columnas:
+* `FECHA`: ISO 8601 (YYYY-MM-DD).
+* `NOM_POSTE`: Identificador de la estación.
+* `LAT` / `LON` / `ALT`: Parámetros geográficos de la estación.
+* `RR`: Milímetros de precipitación.
+* `TM`: Grados Celsius promedio.
+
+## Dependencias
+* `Python 3.9+`
+* `meteofrance-api`
+* `pandas`
