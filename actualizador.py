@@ -37,65 +37,41 @@ ESTACIONES = {
     'VILLENEUVE-LES-MAG-INRAE': {'LAT': 43.5381, 'LON': 3.8538, 'ALTI': 20}
 }
 
+
+
 def crear_grafico(nombre, df):
-    plt.figure(figsize=(10, 6))
+    # Configuración de estilo
+    plt.figure(figsize=(10, 6), dpi=100)
+    sns.set_style("white") # Fondo limpio sin rayas grises pesadas
+
+    # Eje para la Lluvia (Barras Azules hacia arriba)
+    plt.bar(df['FECHA'], df['RR'], color='#4a90e2', label='Lluvia (Gonflement)', zorder=2)
+
+    # Eje para la Temperatura (Barras Naranjas hacia abajo)
+    # Multiplicamos por -1 para que bajen desde el centro
+    plt.bar(df['FECHA'], df['TM'] * -1, color='#ff9f43', label='Stress Térmico (Contracción)', zorder=2)
+
+    # Línea de equilibrio (El "0")
+    plt.axhline(0, color='red', linewidth=1.5, linestyle='-', zorder=3)
+
+    # Ajustes de ejes
+    plt.title(f"MONITOR DE RIESGO INFRAESTRUCTURA: {nombre}", fontsize=14, fontweight='bold', pad=20)
+    plt.ylabel("Hinchamiento (mm)  /  Contracción (°C)", fontsize=10, fontweight='bold')
     
-    # Lluvia
-    ax1 = plt.gca()
-    ax1.bar(df['FECHA'], df['RR'], color='blue', alpha=0.6)
-    ax1.set_ylabel('Lluvia (mm)', color='blue')
+    # Limpiar el eje X
+    plt.xticks(rotation=45, ha='right', fontsize=9)
     
-    # Temperatura Invertida
-    ax2 = ax1.twinx()
-    ax2.plot(df['FECHA'], df['TM'], color='red', marker='o', linewidth=2)
-    ax2.set_ylabel('Temperatura Media (°C)', color='red')
-    ax2.invert_yaxis()
+    # Eliminar bordes innecesarios
+    sns.despine(left=True, bottom=True)
     
-    # EL TÍTULO CAMBIA POR CADA CIUDAD AUTOMÁTICAMENTE
-    plt.title(f"Pronóstico de Riesgo - {nombre}", fontsize=14, fontweight='bold')
-    
+    # Añadir una leyenda elegante
+    plt.legend(loc='upper left', frameon=False, fontsize=9)
+
+    # Ajuste final de márgenes para que no se corten las fechas
+    plt.tight_layout()
+
     if not os.path.exists('graficos'):
         os.makedirs('graficos')
         
-    plt.savefig(f'graficos/{nombre}.png')
+    plt.savefig(f'graficos/{nombre}.png', facecolor='white')
     plt.close()
-
-def main():
-    client = MeteoFranceClient()
-    datos_completos = []
-    
-    for nombre, coord in ESTACIONES.items():
-        try:
-            pronostico = client.get_forecast(latitude=coord['LAT'], longitude=coord['LON'])
-            datos_ciudad = []
-            
-            for dia in pronostico.daily_forecast:
-                fecha = datetime.fromtimestamp(dia['dt']).strftime('%d/%m/%Y')
-                t_max = dia.get('T', {}).get('max', 0)
-                t_min = dia.get('T', {}).get('min', 0)
-                tm = round((t_max + t_min) / 2, 2)
-                rr = dia.get('precipitation', {}).get('24h', 0)
-                
-                fila = {
-                    "NOMBRE": nombre,
-                    "LAT": coord['LAT'],
-                    "LON": coord['LON'],
-                    "ALTI": coord['ALTI'],
-                    "FECHA": fecha,
-                    "RR": rr,
-                    "TM": tm
-                }
-                datos_ciudad.append(fila)
-                datos_completos.append(fila)
-                
-            df_ciudad = pd.DataFrame(datos_ciudad)
-            crear_grafico(nombre, df_ciudad)
-            
-        except Exception as e:
-            pass # Si una ciudad falla, sigue con la siguiente sin detenerse
-
-    # Guarda el archivo de datos general
-    pd.DataFrame(datos_completos).to_csv('datos_pronostico.csv', index=False)
-
-if __name__ == "__main__":
-    main()
