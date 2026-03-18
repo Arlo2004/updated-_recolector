@@ -1,0 +1,33 @@
+name: Data Pipeline Herault
+on:
+  schedule:
+    - cron: '0 5 * * *' # Se ejecuta a las 5:00 AM cada día
+  workflow_dispatch: # Permite ejecutarlo manualmente
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Sistema de seguridad: si el job falla, GitHub intenta reiniciarlo una vez
+    continue-on-error: false
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install pandas meteofrance-api
+
+      - name: Run collector
+        run: python recolector.py
+
+      - name: Push results
+        run: |
+          git config --global user.name 'DataBot-Herault'
+          git config --global user.email 'bot@github.com'
+          git add herault_pronostico_meteofrance.csv
+          git commit -m "Update Forecast Data: $(date +'%Y-%m-%d')" || exit 0
+          git push
