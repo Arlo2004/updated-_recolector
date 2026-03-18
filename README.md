@@ -1,34 +1,35 @@
-# Pipeline de Adquisición de Datos Meteorológicos - Hérault
+# Pipeline d'Acquisition de Données Météorologiques - Hérault
 
-Este repositorio implementa un sistema automatizado de extracción y estructuración de datos climáticos para el monitoreo de riesgos de **Retrait-Gonflement des Argiles (RGA)** en el departamento de Hérault, Francia.
+Ce dépôt implémente un système automatisé d'extraction et de structuration de données climatiques pour la surveillance des risques de Retrait-Gonflement des Argiles (RGA) dans le département de l'Hérault, France.
 
-## Especificaciones del Sistema
+## Spécifications du Système
 
-### 1. Extracción de Datos (Backend)
-El núcleo del sistema es un script de Python (`recolector.py`) que interactúa con la API oficial de **Météo-France**. El proceso incluye:
+### 1. Extraction des Données (Backend)
+Le cœur du système est un script Python (recolector.py) qui interagit avec l'API officielle de Météo-France. Le processus comprend :
 
-* **Segmentación Geográfica:** Monitoreo de 28 estaciones mediante coordenadas GPS y altitudes específicas.
-* **Variables de Control:** * `RR`: Precipitación acumulada en 24h (mm).
-    * `TM`: Temperatura Media diaria calculada mediante la media aritmética de extremos ($T_{max}$, $T_{min}$).
-* **Horizonte Temporal:** Pronóstico dinámico a 7 días.
+* Segmentation Géographique : Surveillance de 28 stations via des coordonnées GPS et altitudes spécifiques.
+* Variables de Contrôle : 
+    * RR : Précipitations accumulées sur 24h (mm).
+    * TM : Température Moyenne quotidienne calculée par la moyenne arithmétique des extrêmes (Tmax, Tmin).
+* Horizon Temporel : Prévisions dynamiques à 7 jours.
 
-### 2. Automatización y Seguridad
-El flujo de datos está gestionado por **GitHub Actions** con los siguientes protocolos:
+### 2. Automatización et Sécurité
+Le flux de données est géré par GitHub Actions avec les protocoles suivants :
 
-* **Programación:** Ejecución diaria automatizada (Cron Job).
-* **Resiliencia:** Implementación de un sistema de reintentos (*retries*) con retardos programados para mitigar errores de red o saturación de API.
-* **Persistencia:** Actualización automática del archivo `herault_pronostico_meteofrance.csv` en la rama principal.
+* Programmation : Exécution quotidienne automatisée (Cron Job).
+* Résilience : Implémentation d'un système de tentatives (retries) avec délais programmés pour pallier les erreurs réseau ou la saturation de l'API.
+* Persistance : Mise à jour automatique du fichier herault_pronostico_meteofrance.csv sur la branche principale.
 
-## Estructura de Salida (Dataset)
+## Estructura de Sortie (Dataset)
 
-El archivo CSV generado contiene las siguientes columnas:
-* `FECHA`: ISO 8601 (YYYY-MM-DD).
-* `NOM_POSTE`: Identificador de la estación.
-* `LAT` / `LON` / `ALT`: Parámetros geográficos de la estación.
-* `RR`: Milímetros de precipitación.
-* `TM`: Grados Celsius promedio.
+Le fichier CSV généré contient les colonnes suivantes :
+* FECHA : Format ISO 8601 (YYYY-MM-DD).
+* NOM_POSTE : Identifiant de la station.
+* LAT / LON / ALT : Paramètres géographiques de la station.
+* RR : Millimètres de précipitations.
+* TM : Température moyenne en degrés Celsius.
 
-## Dependencias
-* `Python 3.9+`
-* `meteofrance-api`
-* `pandas`
+## Dépendances
+* Python 3.9+
+* meteofrance-api
+* pandas
