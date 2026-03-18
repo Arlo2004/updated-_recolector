@@ -1,1 +1,4 @@
-
+meteofrance-api
+pandas
+matplotlib
+seaborn
